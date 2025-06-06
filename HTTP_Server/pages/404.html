@@ -1,5 +1,64 @@
 <!DOCTYPE html>
-<html>
-<head><title>404</title></head>
-<body><h1>404 - Page Not Found</h1></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 - Page Not Found</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fefefe;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+
+    .emoji {
+      font-size: 4rem;
+      animation: float 1.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    a {
+      display: inline-block;
+      text-decoration: none;
+      background: #2c3e50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    a:hover {
+      background: #00bcd4;
+    }
+  </style>
+</head>
+<body>
+  <div class="emoji">😕</div>
+  <h1>404 - Page Not Found</h1>
+  <p>Oops! The page you're looking for doesn't exist.</p>
+  <a href="/">Back to Home</a>
+</body>
 </html>
