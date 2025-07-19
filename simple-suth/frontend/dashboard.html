@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard!</title>
+</head>
+
+<body>
+    <!-- <h2>Todo List</h2> -->
+    <h2>Welcome, <span id="usernameDisplay">...</span>!</h2>
+    <form id="todoForm">
+        <input type="text" id="todoInput" placeholder="Enter task" required />
+        <button type="submit">Add</button>
+    </form>
+    <ul id="todoList"></ul>
+
+
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('http://localhost:4000/user/me', {
+                    credentials: 'include'
+                });
+                if (res.status === 401) {
+                    // 👈 Not logged in, redirect
+                    window.location.href = '/';
+                    return;
+                }
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('usernameDisplay').textContent = data.username;
+                } else {
+                    document.getElementById('usernameDisplay').textContent = 'Guest';
+                }
+            } catch (err) {
+                console.error('Failed to fetch user info:', err);
+                document.getElementById('usernameDisplay').textContent = 'Guest';
+            }
+        });
+
+        const todoForm = document.getElementById('todoForm');
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+
+        // Load todos on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const res = await fetch('http://localhost:4000/dashboard/todos', {
+                credentials: 'include'
+            });
+            const todos = await res.json();
+            todos.forEach(addTodoToDOM);
+        });
+
+        // // Add new todo
+        todoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const task = todoInput.value.trim();
+            if (!task) return;
+
+            const res = await fetch('http://localhost:4000/dashboard/todos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ task })
+            });
+
+            const newTodo = await res.json();
+            addTodoToDOM(newTodo);
+            todoInput.value = '';
+        });
+
+        // // Helper to render todo
+        function addTodoToDOM(todo) {
+            const li = document.createElement('li');
+            li.textContent = todo.task;
+            todoList.appendChild(li);
+        }
+
+    </script>
+</body>
+
+</html>
