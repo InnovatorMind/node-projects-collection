@@ -21,18 +21,15 @@ router.post("/register", async (req, res) => {
     }
 
     const userId = crypto.randomUUID()
-
     usersData.push({
         uid: userId,
         username,
         password,
     })
-
     userTodos.push({
         uid: userId,
         tasks: []
     })
-
 
     // dummy response
     try {
@@ -48,6 +45,7 @@ router.post("/register", async (req, res) => {
 router.post('/login', async (req, res, next) => {
     console.log("You arre in Login page!!!")
     const { username, password } = req.body
+    console.log(username, " ", password)
     const user = usersData.find((user) => user.username === username)
     if (!user || user.password !== password) {
         return res.status(404).json({ error: 'Invalid Credentials' })
@@ -73,6 +71,18 @@ router.get('/me', (req, res) => {
 
     res.json({ username: user.username });
 });
+
+
+router.post('/logout', (req, res) => {
+    console.log("im in logout route")
+  res.clearCookie('uid', {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'Lax'
+  });
+  res.json({ message: 'Logged out' });
+});
+
 
 export default router;
 
