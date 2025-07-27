@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard!</title>
+    <style>
+        li.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Welcome <span id="usernameDisplay">...</span></span>
+        <button id="logoutBtn" style="padding: 4px 8px;">Logout</button>
+    </h2>
+
+
+    <form id="todoForm">
+        <input type="text" id="todoInput" placeholder="Enter task" required />
+        <button type="submit">Add</button>
+    </form>
+
+    <ul id="todoList"></ul>
+
+    <script>
+        const todoForm = document.getElementById('todoForm');
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Get current user
+            try {
+                const res = await fetch('http://localhost:4000/user/me', {
+                    credentials: 'include'
+                });
+                if (res.status === 401) return window.location.href = '/';
+                const data = await res.json();
+                document.getElementById('usernameDisplay').textContent = data.username || 'Guest';
+            } catch (err) {
+                console.error('Failed to fetch user info:', err);
+                document.getElementById('usernameDisplay').textContent = 'Guest';
+            }
+
+            // Load todos
+            try {
+                const res = await fetch('http://localhost:4000/dashboard/todos', {
+                    credentials: 'include'
+                });
+                const todos = await res.json();
+                console.log(todos)
+                todos.forEach(addTodoToDOM);
+            } catch (err) {
+                console.error('Failed to load todos:', err);
+            }
+        });
+
+        todoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const task = todoInput.value.trim();
+            if (!task) return;
+
+            const res = await fetch('http://localhost:4000/dashboard/todos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ task })
+            });
+
+            const newTodo = await res.json();
+            addTodoToDOM(newTodo);
+            todoInput.value = '';
+        });
+
+        // check uncheck todo
+        async function toggleTodo(todoId) {
+            console.log(todoId);
+            await fetch(`http://localhost:4000/dashboard/todos/${todoId}`, {
+                method: 'PATCH',
+                credentials: 'include'
+            });
+        }
+
+        async function deleteTodo(todoId) {
+            const res = await fetch(`http://localhost:4000/dashboard/todos/${todoId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const result = await res.json();
+            if (!result.success) {
+                console.error("Failed to delete todo");
+            }
+        }
+
+        function addTodoToDOM(todo) {
+            const li = document.createElement('li');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = todo.completed;
+
+            if (todo.completed) {
+                li.classList.add('completed');
+            }
+
+            checkbox.addEventListener('change', async () => {
+                todo.completed = !todo.completed;
+                li.classList.toggle('completed', todo.completed);
+                await toggleTodo(todo._id);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '🗑️';
+            deleteBtn.style.marginLeft = '8px';
+            deleteBtn.addEventListener('click', async () => {
+                await deleteTodo(todo._id);
+                li.remove();  // 💥 remove item from the DOM
+            });
+
+            li.appendChild(checkbox);
+            li.append(' ' + (todo.title || todo.task));
+            li.appendChild(deleteBtn);  // 📎 add delete button
+
+            todoList.appendChild(li);
+        }
+
+
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch('http://localhost:4000/user/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.href = '/'; // redirect to login or home
+        });
+    </script>
+</body>
+
+</html>
