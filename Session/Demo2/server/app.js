@@ -20,8 +20,8 @@ app.get("/", (req, res) => {
     res.send("Okey");
 });
 
-app.use(sessionCheck);
-app.use("/dashboard", dashboardRoutes);
+// app.use();
+app.use("/dashboard",sessionCheck, dashboardRoutes);
 app.use("/user", userRoutes);
 
 app.listen(PORT, () => {

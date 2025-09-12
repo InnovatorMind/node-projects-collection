@@ -6,7 +6,6 @@ import Todo from "../models/Todo.js"
 
 // Register user
 export const register = async (req, res) => {
-    // console.log("You are in the register Routes");
     const { username, email, password } = req.body;
 
     if (!email || !username || !password) {
@@ -38,7 +37,6 @@ export const register = async (req, res) => {
 
 // Login user
 export const login = async (req, res) => {
-    console.log("here.. in login")
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -70,7 +68,7 @@ export const login = async (req, res) => {
                 const todos = await Promise.all(
                     tasks.map(task =>
                         Todo.create({
-                            _id: task._id, 
+                            _id: task._id,
                             userId: user._id,
                             task: task.task,
                             completed: task.completed || false,
@@ -102,7 +100,24 @@ export const login = async (req, res) => {
                 },
             });
         }
-        res.json({ message: "Logged in" });
+
+        const newSession = await Session.create({ userId: user._id });
+        newSession.data = {};
+        await newSession.save();
+        res.cookie("sid", newSession.id, {
+            httpOnly: true,
+            signed: true,
+            maxAge: 1000 * 60 * 60 * 24 * 30,
+        });
+
+        return res.json({
+            message: "Login successful",
+            user: {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+            },
+        });
     } catch (err) {
         console.error("Login error:", err);
         res.status(500).json({ error: "Internal server error" });
@@ -110,8 +125,14 @@ export const login = async (req, res) => {
 };
 
 // Logout 
-export const logout = (req, res) => {
-    res.clearCookie("token");
-    res.status(204).end();
+export const logout = async (req, res) => {
+    const sessionId = req.signedCookies.sid;
+    const session = await Session.findById(sessionId);
+    console.log(session);
+    if (session.userId) {
+        await Session.findByIdAndDelete(sessionId);
+        res.clearCookie("sid");
+        res.json({ message: "Logout Successful" });
+    }
 };
 
