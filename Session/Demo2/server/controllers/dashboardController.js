@@ -60,6 +60,7 @@ export const getTodos = async (req, res) => {
     // 🔍 Find the session
     const session = await Session.findById(sessionId);
     if (!session) {
+      res.clearCookie("sid");
       return res.status(404).json({ error: "Session not found" });
     }
 

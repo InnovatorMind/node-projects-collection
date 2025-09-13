@@ -48,14 +48,16 @@ export const login = async (req, res) => {
         if (!user) return res.status(404).json({ error: "User not found" });
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-
         if (!isPasswordValid) {
             return res.status(404).json({ error: "Invalid Credentials" });
         }
 
+        // 🔴 Delete old sessions for this user
+        await Session.deleteMany({ userId: user._id });
+
         const sessionId = req.signedCookies.sid;
         const session = await Session.findById(sessionId);
-        console.log(session);
+        console.log("-> ", session);
 
         if (session) {
             session.expires = Math.round(Date.now() / 1000) + 60 * 60 * 24 * 30;
@@ -129,6 +131,9 @@ export const logout = async (req, res) => {
     const sessionId = req.signedCookies.sid;
     const session = await Session.findById(sessionId);
     console.log(session);
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
     if (session.userId) {
         await Session.findByIdAndDelete(sessionId);
         res.clearCookie("sid");
