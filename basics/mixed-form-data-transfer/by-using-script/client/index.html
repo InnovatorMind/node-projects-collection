@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Transfer</title>
+</head>
+
+<body style="background-color: rgb(55, 53, 53); color: white;">
+    <h2>Register</h2>
+    <form id="myForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="file" id="fileInput" required>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const form = document.getElementById("myForm");
+        const fileInput = document.getElementById("fileInput");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append("username", document.getElementById("username").value);
+            formData.append("email", document.getElementById("email").value);
+            formData.append("password", document.getElementById("password").value);
+            formData.append("profilePic", fileInput.files[0]); // file included
+
+            const response = await fetch("http://localhost:4000/register", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.text();
+            alert(result);
+        });
+    </script>
+</body>
+
+</html>

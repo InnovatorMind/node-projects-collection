@@ -1,0 +1,17 @@
+{
+  "name": "getting-data-fron-frontend",
+  "version": "1.0.0",
+  "main": "demo.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch demo.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
